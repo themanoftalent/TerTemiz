@@ -33,10 +33,12 @@ class TerTemizApp(ctk.CTk):
         ctk.set_default_color_theme("blue")
 
         self.title(f"TerTemiz Professional {APP_VERSION}")
-        width = min(1280, self.winfo_screenwidth() - 40)
-        height = min(820, self.winfo_screenheight() - 120)
-        left = max(0, (self.winfo_screenwidth() - width) // 2)
-        top = max(0, (self.winfo_screenheight() - height) // 2 - 20)
+        screen_width = int(self._reverse_window_scaling(self.winfo_screenwidth()))
+        screen_height = int(self._reverse_window_scaling(self.winfo_screenheight()))
+        width = min(1280, screen_width - 40)
+        height = min(820, screen_height - 120)
+        left = max(0, (screen_width - width) // 2)
+        top = max(0, (screen_height - height) // 2 - 20)
         self.geometry(f"{width}x{height}+{left}+{top}")
         self.minsize(min(960, width), min(600, height))
 
