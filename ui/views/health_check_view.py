@@ -1,4 +1,4 @@
-import customtkinter as ctk
+from ui import widgets as ctk
 import threading
 import time
 from core.cleaner import SystemCleaner
@@ -35,8 +35,8 @@ class HealthCheckView(ctk.CTkFrame):
             self._build_done_view()
 
     def _build_initial_view(self):
-        center_box = ctk.CTkFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
-        center_box.place(relx=0.5, rely=0.48, anchor="center", relwidth=0.88, relheight=0.82)
+        center_box = ctk.CTkScrollableFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
+        center_box.pack(fill="both", expand=True, padx=20, pady=15)
 
         # Big icon
         icon_label = ctk.CTkLabel(center_box, text="🩺", font=ctk.CTkFont(size=64))
@@ -61,7 +61,8 @@ class HealthCheckView(ctk.CTkFrame):
 
         # 4 feature preview pills
         pills_frame = ctk.CTkFrame(center_box, fg_color="transparent")
-        pills_frame.pack(pady=20)
+        pills_frame.pack(fill="x", padx=20, pady=20)
+        pills_frame.columnconfigure((0, 1), weight=1, uniform="features")
 
         features = [
             ("🔒 Gizlilik Koruması", "İzleyicileri ve çerezleri siler"),
@@ -70,10 +71,10 @@ class HealthCheckView(ctk.CTkFrame):
             ("🛡️ Güvenlik Kontrolü", "Sistem durumunu inceler")
         ]
 
-        for title_text, desc_text in features:
-            f_card = ctk.CTkFrame(pills_frame, fg_color=CCleanerTheme.DARK_BG_MAIN, corner_radius=10, width=170, height=85)
-            f_card.pack(side="left", padx=8)
-            f_card.pack_propagate(False)
+        for index, (title_text, desc_text) in enumerate(features):
+            f_card = ctk.CTkFrame(pills_frame, fg_color=CCleanerTheme.DARK_BG_MAIN, corner_radius=10, height=85)
+            f_card.grid(row=index // 2, column=index % 2, sticky="nsew", padx=6, pady=6)
+            f_card.pack_propagate(True)
             
             lbl_t = ctk.CTkLabel(f_card, text=title_text, font=ctk.CTkFont(family=CCleanerTheme.FONT_FAMILY, size=12, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY)
             lbl_t.pack(pady=(14, 2))
@@ -95,8 +96,8 @@ class HealthCheckView(ctk.CTkFrame):
         start_btn.pack(pady=(25, 30))
 
     def _build_scanning_view(self):
-        center_box = ctk.CTkFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
-        center_box.place(relx=0.5, rely=0.48, anchor="center", relwidth=0.88, relheight=0.82)
+        center_box = ctk.CTkScrollableFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
+        center_box.pack(fill="both", expand=True, padx=20, pady=15)
 
         icon_label = ctk.CTkLabel(center_box, text="⚡", font=ctk.CTkFont(size=54))
         icon_label.pack(pady=(50, 10))
@@ -138,8 +139,8 @@ class HealthCheckView(ctk.CTkFrame):
             center_box,
             text="İptal Et",
             font=ctk.CTkFont(family=CCleanerTheme.FONT_FAMILY, size=13),
-            fg_color="#374151",
-            hover_color="#4b5563",
+            fg_color=CCleanerTheme.BG_INPUT,
+            hover_color=CCleanerTheme.BG_CARD_HOVER,
             corner_radius=20,
             height=36,
             width=130,
@@ -222,8 +223,8 @@ class HealthCheckView(ctk.CTkFrame):
         ctk.CTkLabel(c4, text="Temel Windows sistem bileşenleri ve yüklü uygulamalar kontrol edildi.", font=ctk.CTkFont(size=12), text_color=CCleanerTheme.DARK_TEXT_SECONDARY, justify="left").pack(anchor="w", padx=20, pady=(5, 15))
 
     def _build_cleaning_view(self):
-        center_box = ctk.CTkFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
-        center_box.place(relx=0.5, rely=0.48, anchor="center", relwidth=0.88, relheight=0.82)
+        center_box = ctk.CTkScrollableFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
+        center_box.pack(fill="both", expand=True, padx=20, pady=15)
 
         icon_label = ctk.CTkLabel(center_box, text="🧹", font=ctk.CTkFont(size=56))
         icon_label.pack(pady=(60, 10))
@@ -249,8 +250,8 @@ class HealthCheckView(ctk.CTkFrame):
         self.clean_progress_bar.set(0.0)
 
     def _build_done_view(self):
-        center_box = ctk.CTkFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
-        center_box.place(relx=0.5, rely=0.48, anchor="center", relwidth=0.88, relheight=0.82)
+        center_box = ctk.CTkScrollableFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
+        center_box.pack(fill="both", expand=True, padx=20, pady=15)
 
         icon_label = ctk.CTkLabel(center_box, text="🎉", font=ctk.CTkFont(size=64))
         icon_label.pack(pady=(45, 10))
@@ -295,8 +296,8 @@ class HealthCheckView(ctk.CTkFrame):
             btn_row,
             text="🧹 Özel Temizleme'ye Git",
             font=ctk.CTkFont(family=CCleanerTheme.FONT_FAMILY, size=14),
-            fg_color="#374151",
-            hover_color="#4b5563",
+            fg_color=CCleanerTheme.BG_INPUT,
+            hover_color=CCleanerTheme.BG_CARD_HOVER,
             corner_radius=22,
             height=44,
             width=200,

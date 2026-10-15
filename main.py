@@ -1,6 +1,6 @@
 import os
 import sys
-import customtkinter as ctk
+from ui import widgets as ctk
 from PIL import Image
 
 # Ensure project root is in sys.path
@@ -9,6 +9,10 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from ui.theme import CCleanerTheme
+from ui.constants import APP_VERSION
+from core.preferences import load_preferences, save_preferences
+from ui.i18n import set_language
+from ui.views.updater_view import UpdaterView
 from core.system_info import get_system_summary, get_ram_info, get_disk_info
 from ui.views.health_check_view import HealthCheckView
 from ui.views.custom_clean_view import CustomCleanView
@@ -23,12 +27,14 @@ class TerTemizApp(ctk.CTk):
         super().__init__()
 
         # Appearance mode and color theme
-        ctk.set_appearance_mode("dark")
+        self.preferences = load_preferences()
+        set_language(self.preferences["language"])
+        ctk.set_appearance_mode(self.preferences["theme"])
         ctk.set_default_color_theme("blue")
 
         self.title(f"TerTemiz Professional {APP_VERSION}")
-        self.geometry("1160x740")
-        self.minsize(1020, 640)
+        self.geometry(f"{min(1280, self.winfo_screenwidth() - 40)}x{min(820, self.winfo_screenheight() - 80)}")
+        self.minsize(960, 600)
 
         # Set Window Icon if exists
         icon_path = os.path.join(BASE_DIR, "assets", "tertemiz_icon.ico")
@@ -48,18 +54,36 @@ class TerTemizApp(ctk.CTk):
         self._build_layout()
         self._navigate_to("health_check")
 
+    def _save_preferences(self):
+        try:
+            save_preferences(self.preferences)
+        except OSError as exc:
+            from tkinter import messagebox
+            messagebox.showerror("TerTemiz", str(exc), parent=self)
+
+    def _set_theme(self, mode):
+        self.preferences["theme"] = mode
+        ctk.set_appearance_mode(mode)
+        self._save_preferences()
+
+    def _set_language(self, language):
+        self.preferences["language"] = language
+        set_language(language)
+        ctk.refresh_language(self)
+        self._save_preferences()
+
     def _build_layout(self):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(1, weight=1)
 
         # 1. TOP HEADER (Hardware & Specs)
-        self.header_frame = ctk.CTkFrame(self, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, height=52, corner_radius=0, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
+        self.header_frame = ctk.CTkFrame(self, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, corner_radius=0, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
         self.header_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
-        self.header_frame.pack_propagate(False)
+        self.header_frame.grid_propagate(True)
 
         # Left branding in header
         brand_box = ctk.CTkFrame(self.header_frame, fg_color="transparent")
-        brand_box.pack(side="left", padx=16)
+        brand_box.pack(side="top", anchor="w", padx=16, pady=(8, 0))
 
         # Load Logo image
         logo_png = os.path.join(BASE_DIR, "assets", "tertemiz_logo.png")
@@ -91,7 +115,7 @@ class TerTemizApp(ctk.CTk):
 
         # Right hardware specs summary
         specs_box = ctk.CTkFrame(self.header_frame, fg_color="transparent")
-        specs_box.pack(side="right", padx=20)
+        specs_box.pack(side="top", fill="x", padx=16, pady=6)
 
         summary_text = f"💻 {self.system_info['os']}  |  🧠 {self.system_info['cpu'].split('@')[0].strip()}  |  📊 {self.system_info['ram']['total']}  |  🎮 {self.system_info['gpu']}"
         lbl_specs = ctk.CTkLabel(
@@ -100,10 +124,10 @@ class TerTemizApp(ctk.CTk):
             font=ctk.CTkFont(family=CCleanerTheme.FONT_FAMILY, size=11),
             text_color=CCleanerTheme.DARK_TEXT_SECONDARY
         )
-        lbl_specs.pack(side="right")
+        lbl_specs.pack(anchor="w")
 
         # 2. LEFT SIDEBAR NAVIGATION
-        self.sidebar_frame = ctk.CTkFrame(self, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, width=225, corner_radius=0, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
+        self.sidebar_frame = ctk.CTkFrame(self, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, width=270, corner_radius=0, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
         self.sidebar_frame.grid(row=1, column=0, sticky="nsew")
         self.sidebar_frame.grid_propagate(False)
 
@@ -112,14 +136,15 @@ class TerTemizApp(ctk.CTk):
             ("health_check", "🩺  Sağlık Kontrolü"),
             ("custom_clean", "🧹  Özel Temizleme"),
             ("performance", "⚡  Performans İyileştirici"),
+            ("updater", "📦  Uygulama Güncelleyici"),
             ("driver_updater", "🔄  Sürücü Güncelleyici"),
             ("registry", "📑  Kayıt Defteri"),
             ("tools", "🛠️  Araçlar"),
             ("settings", "⚙️  Seçenekler"),
         ]
 
-        self.nav_container = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
-        self.nav_container.pack(fill="x", pady=15, padx=10)
+        self.nav_container = ctk.CTkScrollableFrame(self.sidebar_frame, fg_color="transparent")
+        self.nav_container.pack(fill="both", expand=True, pady=15, padx=10)
 
         for tab_id, text in nav_items:
             btn = ctk.CTkButton(
@@ -194,6 +219,8 @@ class TerTemizApp(ctk.CTk):
                 self.views[tab_id] = CustomCleanView(self.content_container)
             elif tab_id == "performance":
                 self.views[tab_id] = PerformanceOptimizerView(self.content_container)
+            elif tab_id == "updater":
+                self.views[tab_id] = UpdaterView(self.content_container)
             elif tab_id == "driver_updater":
                 self.views[tab_id] = DriverUpdaterView(self.content_container)
             elif tab_id == "registry":
@@ -201,7 +228,7 @@ class TerTemizApp(ctk.CTk):
             elif tab_id == "tools":
                 self.views[tab_id] = ToolsView(self.content_container)
             elif tab_id == "settings":
-                self.views[tab_id] = SettingsView(self.content_container)
+                self.views[tab_id] = SettingsView(self.content_container, preferences=self.preferences, on_theme_change=self._set_theme, on_language_change=self._set_language)
 
         self.views[tab_id].pack(fill="both", expand=True)
 

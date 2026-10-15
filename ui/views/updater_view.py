@@ -1,6 +1,9 @@
-import customtkinter as ctk
+from ui import widgets as ctk
 import threading
 import time
+import webbrowser
+from tkinter import messagebox
+from ui.i18n import tr
 from core.app_updater import AppUpdater
 from core.driver_updater import DriverScanner
 from ui.theme import CCleanerTheme
@@ -17,6 +20,8 @@ class UpdaterView(ctk.CTkFrame):
         self.is_scanning_apps = False
         self.is_scanning_drivers = False
 
+        self.update_queue = []
+        self._batch_mode = False
         self._build_ui()
         self._start_scan_apps()
 
@@ -38,10 +43,10 @@ class UpdaterView(ctk.CTkFrame):
         self.updater_tabs.pack(fill="both", expand=True)
 
         self.tab_apps = self.updater_tabs.add("📦 Uygulama Güncelleyici (Software)")
-        self.tab_drivers = self.updater_tabs.add("⚙️ Donanım Sürücüleri (Drivers)")
+
 
         self._build_apps_tab()
-        self._build_drivers_tab()
+
 
     # ==========================================
     # 1. SOFTWARE & APPS UPDATER TAB
@@ -60,10 +65,10 @@ class UpdaterView(ctk.CTkFrame):
         header_card.pack(fill="x", padx=10, pady=(10, 15), ipady=8)
 
         icon_lbl = ctk.CTkLabel(header_card, text="📦", font=ctk.CTkFont(size=36))
-        icon_lbl.pack(side="left", padx=(20, 15))
+        icon_lbl.pack(side="top", anchor="w", padx=15)
 
         txt_box = ctk.CTkFrame(header_card, fg_color="transparent")
-        txt_box.pack(side="left", fill="y", pady=5)
+        txt_box.pack(side="top", fill="x", padx=15, pady=5)
 
         self.lbl_app_title = ctk.CTkLabel(
             txt_box, 
@@ -94,7 +99,7 @@ class UpdaterView(ctk.CTkFrame):
             width=160,
             command=self._update_all_apps
         )
-        self.btn_update_all_apps.pack(side="right", padx=20)
+        self.btn_update_all_apps.pack(side="bottom", anchor="e", padx=15, pady=5)
 
         self.btn_scan_apps = ctk.CTkButton(
             header_card,
@@ -108,17 +113,17 @@ class UpdaterView(ctk.CTkFrame):
             width=130,
             command=self._start_scan_apps
         )
-        self.btn_scan_apps.pack(side="right", padx=(0, 10))
+        self.btn_scan_apps.pack(side="bottom", anchor="e", padx=15, pady=5)
 
         # Table Header
         th = ctk.CTkFrame(parent, fg_color=CCleanerTheme.BG_INPUT, height=34, corner_radius=6)
         th.pack(fill="x", padx=10, pady=(0, 4))
-        th.pack_propagate(False)
+        th.grid_propagate(True)
 
-        ctk.CTkLabel(th, text="Uygulama Adı / Kimlik", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY).place(relx=0.03, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Kurulu Sürüm", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY).place(relx=0.48, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Yeni Sürüm", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY).place(relx=0.64, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Eylem", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY).place(relx=0.84, rely=0.5, anchor="w")
+        ctk.table_cell(ctk.CTkLabel(th, text="Uygulama Adı / Kimlik", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY), 0.03)
+        ctk.table_cell(ctk.CTkLabel(th, text="Kurulu Sürüm", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY), 0.48)
+        ctk.table_cell(ctk.CTkLabel(th, text="Yeni Sürüm", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY), 0.64)
+        ctk.table_cell(ctk.CTkLabel(th, text="Eylem", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY), 0.84)
 
         # Scrollable App List
         self.apps_scroll = ctk.CTkScrollableFrame(parent, fg_color="transparent")
@@ -159,6 +164,15 @@ class UpdaterView(ctk.CTkFrame):
         for w in self.apps_scroll.winfo_children():
             w.destroy()
 
+        if self.app_updater.last_error:
+            self.lbl_app_title.configure(text="Güncelleme taraması başarısız")
+            self.lbl_app_sub.configure(text=self.app_updater.last_error)
+            self.btn_update_all_apps.configure(state="disabled")
+            self._show_apps_placeholder(self.app_updater.last_error)
+            ctk.CTkButton(self.apps_scroll, text="WinGet Kurulumunu Aç",
+                          command=lambda: webbrowser.open("ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1")).pack(pady=10)
+            return
+
         if not self.apps:
             self.lbl_app_title.configure(text="Tüm Programlarınız Güncel! 🎉")
             self.lbl_app_sub.configure(text="Sisteminizdeki yazılımlar en son sürümlerinde çalışıyor.")
@@ -185,15 +199,13 @@ class UpdaterView(ctk.CTkFrame):
                 border_color=CCleanerTheme.BORDER
             )
             row.pack(fill="x", pady=3)
-            row.pack_propagate(False)
+            row.grid_propagate(True)
 
             # Name and ID
             name_box = ctk.CTkFrame(row, fg_color="transparent")
-            name_box.place(relx=0.03, rely=0.5, anchor="w")
+            ctk.table_cell(name_box, 0.03)
 
             app_name = app["name"]
-            if len(app_name) > 36:
-                app_name = app_name[:34] + "..."
             lbl_name = ctk.CTkLabel(
                 name_box, 
                 text=app_name, 
@@ -219,7 +231,7 @@ class UpdaterView(ctk.CTkFrame):
                 font=ctk.CTkFont(size=11), 
                 text_color=CCleanerTheme.TEXT_SECONDARY
             )
-            lbl_cur.place(relx=0.48, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_cur, 0.48)
 
             # Available Version
             lbl_new = ctk.CTkLabel(
@@ -228,7 +240,7 @@ class UpdaterView(ctk.CTkFrame):
                 font=ctk.CTkFont(size=11, weight="bold"), 
                 text_color=CCleanerTheme.PRIMARY
             )
-            lbl_new.place(relx=0.64, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_new, 0.64)
 
             # Action button
             if app["status"] == "Güncel":
@@ -238,7 +250,7 @@ class UpdaterView(ctk.CTkFrame):
                     font=ctk.CTkFont(size=11, weight="bold"), 
                     text_color=CCleanerTheme.SUCCESS
                 )
-                lbl_done.place(relx=0.84, rely=0.5, anchor="w")
+                ctk.table_cell(lbl_done, 0.84)
             else:
                 btn_up = ctk.CTkButton(
                     row,
@@ -251,13 +263,17 @@ class UpdaterView(ctk.CTkFrame):
                     corner_radius=14,
                     command=lambda target=app: self._open_update_modal(target)
                 )
-                btn_up.place(relx=0.84, rely=0.5, anchor="w")
+                ctk.table_cell(btn_up, 0.84)
 
     def _open_update_modal(self, app):
+        if self.app_updater.is_updating:
+            return
         modal = ctk.CTkToplevel(self)
         modal.title(f"Güncelleme: {app['name']}")
         modal.geometry("560x420")
-        modal.resizable(False, False)
+        modal.resizable(True, True)
+        modal.minsize(520, 400)
+        modal.protocol("WM_DELETE_WINDOW", lambda: None)
         modal.transient(self.winfo_toplevel())
         modal.grab_set()
 
@@ -314,7 +330,7 @@ class UpdaterView(ctk.CTkFrame):
             modal, 
             text="Güncelleme Sürüyor...", 
             state="disabled", 
-            fg_color="#374151",
+            fg_color=CCleanerTheme.BG_INPUT,
             corner_radius=16,
             height=34,
             command=modal.destroy
@@ -343,6 +359,14 @@ class UpdaterView(ctk.CTkFrame):
                 else:
                     lbl_step.configure(text="İşlem tamamlandı. Detayları yukarıdaki günlükten inceleyebilirsiniz.", text_color=CCleanerTheme.PRIMARY)
                     btn_close.configure(text="Kapat", state="normal", fg_color=CCleanerTheme.PRIMARY)
+                modal.protocol("WM_DELETE_WINDOW", modal.destroy)
+                if self._batch_mode:
+                    # Continue only after the user has reviewed/closed this result.
+                    def next_update():
+                        modal.destroy()
+                        self._run_next_update()
+                    btn_close.configure(command=next_update)
+                    modal.protocol("WM_DELETE_WINDOW", next_update)
             try:
                 modal.after(0, finish_ui)
             except Exception:
@@ -352,176 +376,20 @@ class UpdaterView(ctk.CTkFrame):
         self.app_updater.run_update(app["id"], on_output=on_log, on_finish=on_done)
 
     def _update_all_apps(self):
-        if not self.apps:
+        if self.app_updater.is_updating:
             return
-        # Open modal for the first outdated app
-        outdated = [a for a in self.apps if a["status"] != "Güncel"]
-        if outdated:
-            self._open_update_modal(outdated[0])
-
-    # ==========================================
-    # 2. HARDWARE DRIVERS TAB
-    # ==========================================
-    def _build_drivers_tab(self):
-        parent = self.tab_drivers
-
-        # Header card
-        header_card = ctk.CTkFrame(
-            parent, 
-            fg_color=CCleanerTheme.BG_CARD, 
-            corner_radius=12, 
-            border_width=1, 
-            border_color=CCleanerTheme.BORDER
-        )
-        header_card.pack(fill="x", padx=10, pady=(10, 15), ipady=8)
-
-        icon_lbl = ctk.CTkLabel(header_card, text="⚙️", font=ctk.CTkFont(size=36))
-        icon_lbl.pack(side="left", padx=(20, 15))
-
-        txt_box = ctk.CTkFrame(header_card, fg_color="transparent")
-        txt_box.pack(side="left", fill="y", pady=5)
-
-        self.lbl_drv_title = ctk.CTkLabel(
-            txt_box, 
-            text="Donanım Aygıtları ve Sürücü Analizi", 
-            font=ctk.CTkFont(size=17, weight="bold"), 
-            text_color=CCleanerTheme.TEXT_PRIMARY, 
-            anchor="w"
-        )
-        self.lbl_drv_title.pack(anchor="w")
-
-        self.lbl_drv_sub = ctk.CTkLabel(
-            txt_box, 
-            text="Ekran, ses, ağ ve sistem aygıt sürücülerinin donanım kimlikleri denetleniyor.", 
-            font=ctk.CTkFont(size=12), 
-            text_color=CCleanerTheme.TEXT_SECONDARY, 
-            anchor="w"
-        )
-        self.lbl_drv_sub.pack(anchor="w")
-
-        self.btn_scan_drivers = ctk.CTkButton(
-            header_card,
-            text="🔄 Sürücüleri Tara",
-            font=ctk.CTkFont(size=13),
-            fg_color=CCleanerTheme.PRIMARY,
-            hover_color=CCleanerTheme.PRIMARY_HOVER,
-            corner_radius=18,
-            height=38,
-            width=150,
-            command=self._start_scan_drivers
-        )
-        self.btn_scan_drivers.pack(side="right", padx=20)
-
-        # Category Filter
-        filter_bar = ctk.CTkFrame(parent, fg_color="transparent")
-        filter_bar.pack(fill="x", padx=10, pady=(0, 10))
-
-        cats = ["Tümü", "Grafik & Ekran", "Ses & Medya", "Ağ Bağdaştırıcısı", "Giriş & Bluetooth", "Sistem Aygıtı"]
-        self.drv_cat_buttons = {}
-        for c in cats:
-            btn = ctk.CTkButton(
-                filter_bar,
-                text=c,
-                font=ctk.CTkFont(size=11),
-                height=28,
-                corner_radius=14,
-                fg_color=CCleanerTheme.PRIMARY if c == "Tümü" else CCleanerTheme.BG_INPUT,
-                hover_color=CCleanerTheme.PRIMARY_HOVER if c == "Tümü" else CCleanerTheme.BG_CARD_HOVER,
-                text_color="#ffffff" if c == "Tümü" else CCleanerTheme.TEXT_PRIMARY,
-                command=lambda cat=c: self._select_driver_category(cat)
-            )
-            btn.pack(side="left", padx=3)
-            self.drv_cat_buttons[c] = btn
-
-        # Table Header
-        th = ctk.CTkFrame(parent, fg_color=CCleanerTheme.BG_INPUT, height=34, corner_radius=6)
-        th.pack(fill="x", padx=10, pady=(0, 4))
-        th.pack_propagate(False)
-
-        ctk.CTkLabel(th, text="Aygıt Adı & Üretici", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY).place(relx=0.03, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Kategori", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY).place(relx=0.46, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Sürüm / Tarih", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY).place(relx=0.66, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Durum", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.TEXT_SECONDARY).place(relx=0.85, rely=0.5, anchor="w")
-
-        # Scrollable Driver List
-        self.drivers_scroll = ctk.CTkScrollableFrame(parent, fg_color="transparent")
-        self.drivers_scroll.pack(fill="both", expand=True, padx=10, pady=(4, 10))
-
-        self._start_scan_drivers()
-
-    def _start_scan_drivers(self):
-        if self.is_scanning_drivers:
+        outdated = [app for app in self.apps if app["status"] != "Güncel"]
+        if not outdated:
             return
-        self.is_scanning_drivers = True
-        self.btn_scan_drivers.configure(state="disabled")
+        if not messagebox.askyesno("TerTemiz", tr("Seçili uygulama güncellemeleri sırayla kurulacak. Devam edilsin mi?"), parent=self):
+            return
+        self.update_queue = list(outdated)
+        self._batch_mode = True
+        self._run_next_update()
 
-        def worker():
-            devs = self.driver_scanner.scan_devices()
-            self.drivers = devs
-            self.is_scanning_drivers = False
-            try:
-                self.after(0, self._render_drivers)
-            except Exception:
-                pass
-
-        threading.Thread(target=worker, daemon=True).start()
-
-    def _render_drivers(self):
-        self.btn_scan_drivers.configure(state="normal")
-        uptodate_count = sum(1 for d in self.drivers if d["status_str"] == "Güncel")
-        self.lbl_drv_title.configure(text=f"Donanım Sürücüleri: {len(self.drivers)} Aygıt Denetlendi")
-        self.lbl_drv_sub.configure(text=f"✅ {uptodate_count} Güncel Sürücü  |  Sistem donanım bileşenleri sorunsuz çalışıyor.")
-        self._filter_drivers()
-
-    def _select_driver_category(self, cat):
-        self.selected_driver_category = cat
-        for c, btn in self.drv_cat_buttons.items():
-            if c == cat:
-                btn.configure(fg_color=CCleanerTheme.PRIMARY, hover_color=CCleanerTheme.PRIMARY_HOVER, text_color="#ffffff")
-            else:
-                btn.configure(fg_color=CCleanerTheme.BG_INPUT, hover_color=CCleanerTheme.BG_CARD_HOVER, text_color=CCleanerTheme.TEXT_PRIMARY)
-        self._filter_drivers()
-
-    def _filter_drivers(self):
-        filtered = self.drivers if self.selected_driver_category == "Tümü" else [d for d in self.drivers if d["category"] == self.selected_driver_category]
-
-        for w in self.drivers_scroll.winfo_children():
-            w.destroy()
-
-        for d in filtered[:60]:
-            row = ctk.CTkFrame(
-                self.drivers_scroll, 
-                fg_color=CCleanerTheme.BG_CARD, 
-                height=46, 
-                corner_radius=8, 
-                border_width=1, 
-                border_color=CCleanerTheme.BORDER
-            )
-            row.pack(fill="x", pady=2)
-            row.pack_propagate(False)
-
-            name_box = ctk.CTkFrame(row, fg_color="transparent")
-            name_box.place(relx=0.03, rely=0.5, anchor="w")
-
-            d_name = d["name"]
-            if len(d_name) > 42:
-                d_name = d_name[:40] + "..."
-            lbl_name = ctk.CTkLabel(name_box, text=d_name, font=ctk.CTkFont(size=12, weight="bold"), text_color=CCleanerTheme.TEXT_PRIMARY, anchor="w")
-            lbl_name.pack(anchor="w")
-
-            lbl_mfg = ctk.CTkLabel(name_box, text=d["manufacturer"], font=ctk.CTkFont(size=10), text_color=CCleanerTheme.TEXT_MUTED, anchor="w")
-            lbl_mfg.pack(anchor="w")
-
-            lbl_cat = ctk.CTkLabel(row, text=d["category"], font=ctk.CTkFont(size=11), text_color=CCleanerTheme.TEXT_SECONDARY)
-            lbl_cat.place(relx=0.46, rely=0.5, anchor="w")
-
-            lbl_ver = ctk.CTkLabel(row, text=f"{d['version']} ({d['date']})", font=ctk.CTkFont(size=11), text_color=CCleanerTheme.TEXT_MUTED)
-            lbl_ver.place(relx=0.66, rely=0.5, anchor="w")
-
-            pill = ctk.CTkLabel(
-                row,
-                text=f"● {d['status_str']}",
-                font=ctk.CTkFont(size=11, weight="bold"),
-                text_color=d["status_color"]
-            )
-            pill.place(relx=0.85, rely=0.5, anchor="w")
+    def _run_next_update(self):
+        if self.update_queue:
+            self._open_update_modal(self.update_queue.pop(0))
+        else:
+            self._batch_mode = False
+            self._start_scan_apps()

@@ -209,6 +209,8 @@ class DiskAnalyzer:
                 if not self.is_scanning or total_scanned >= max_files:
                     break
                 for f in files:
+                    if not self.is_scanning or total_scanned >= max_files:
+                        break
                     total_scanned += 1
                     if total_scanned % 500 == 0 and on_progress:
                         on_progress(f, total_scanned)
@@ -302,11 +304,10 @@ class DuplicateFinder:
             hash_map = defaultdict(list)
             for fp in size_map[sz]:
                 try:
-                    h = hashlib.md5()
+                    h = hashlib.sha256()
                     with open(fp, "rb") as f:
-                        # read up to 512KB for fast hash comparison
-                        chunk = f.read(512 * 1024)
-                        h.update(chunk)
+                        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                            h.update(chunk)
                     hash_map[h.hexdigest()].append(fp)
                 except Exception:
                     pass

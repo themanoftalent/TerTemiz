@@ -1,6 +1,7 @@
-import customtkinter as ctk
+from ui import widgets as ctk
 import threading
 import time
+import os
 from core.driver_updater import DriverScanner
 from ui.theme import CCleanerTheme
 
@@ -23,10 +24,10 @@ class DriverUpdaterView(ctk.CTkFrame):
         header_card.pack(fill="x", pady=(0, 15), ipady=8)
 
         icon_lbl = ctk.CTkLabel(header_card, text="🔄", font=ctk.CTkFont(size=36))
-        icon_lbl.pack(side="left", padx=(20, 15))
+        icon_lbl.pack(side="top", anchor="w", padx=15)
 
         txt_box = ctk.CTkFrame(header_card, fg_color="transparent")
-        txt_box.pack(side="left", fill="y", pady=5)
+        txt_box.pack(side="top", fill="x", padx=15, pady=5)
 
         self.lbl_title = ctk.CTkLabel(txt_box, text="Donanım Sürücüleri Taranıyor...", font=ctk.CTkFont(size=18, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY, anchor="w")
         self.lbl_title.pack(anchor="w")
@@ -45,20 +46,20 @@ class DriverUpdaterView(ctk.CTkFrame):
             width=160,
             command=self._update_all_drivers
         )
-        self.btn_update_all.pack(side="right", padx=20)
+        self.btn_update_all.pack(side="bottom", anchor="e", padx=15, pady=5)
 
         self.btn_scan = ctk.CTkButton(
             header_card,
             text="Yeniden Tara",
             font=ctk.CTkFont(size=13),
-            fg_color="#374151",
-            hover_color="#4b5563",
+            fg_color=CCleanerTheme.BG_INPUT,
+            hover_color=CCleanerTheme.BG_CARD_HOVER,
             corner_radius=18,
             height=38,
             width=120,
             command=self._start_scan
         )
-        self.btn_scan.pack(side="right", padx=(0, 10))
+        self.btn_scan.pack(side="bottom", anchor="e", padx=15, pady=5)
 
         # CATEGORY FILTER TABS
         filter_bar = ctk.CTkFrame(container, fg_color="transparent")
@@ -66,7 +67,7 @@ class DriverUpdaterView(ctk.CTkFrame):
 
         cats = ["Tümü", "Grafik & Ekran", "Ses & Medya", "Ağ Bağdaştırıcısı", "Giriş & Bluetooth", "Sistem Aygıtı"]
         self.cat_buttons = {}
-        for c in cats:
+        for index, c in enumerate(cats):
             btn = ctk.CTkButton(
                 filter_bar,
                 text=c,
@@ -77,18 +78,19 @@ class DriverUpdaterView(ctk.CTkFrame):
                 hover_color=CCleanerTheme.PRIMARY_HOVER if c == "Tümü" else CCleanerTheme.DARK_BG_CARD_HOVER,
                 command=lambda cat=c: self._select_category(cat)
             )
-            btn.pack(side="left", padx=4)
+            btn.grid(row=index // 3, column=index % 3, sticky="ew", padx=4, pady=4)
+            filter_bar.columnconfigure(index % 3, weight=1)
             self.cat_buttons[c] = btn
 
         # TABLE HEADER
         tbl_header = ctk.CTkFrame(container, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, height=36, corner_radius=6)
         tbl_header.pack(fill="x", pady=(0, 4))
-        tbl_header.pack_propagate(False)
+        tbl_header.grid_propagate(True)
 
-        ctk.CTkLabel(tbl_header, text="Aygıt Adı & Üretici", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.03, rely=0.5, anchor="w")
-        ctk.CTkLabel(tbl_header, text="Kategori", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.45, rely=0.5, anchor="w")
-        ctk.CTkLabel(tbl_header, text="Sürüm / Tarih", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.64, rely=0.5, anchor="w")
-        ctk.CTkLabel(tbl_header, text="Durum", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.82, rely=0.5, anchor="w")
+        ctk.table_cell(ctk.CTkLabel(tbl_header, text="Aygıt Adı & Üretici", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.03)
+        ctk.table_cell(ctk.CTkLabel(tbl_header, text="Kategori", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.45)
+        ctk.table_cell(ctk.CTkLabel(tbl_header, text="Sürüm / Tarih", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.64)
+        ctk.table_cell(ctk.CTkLabel(tbl_header, text="Durum", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.82)
 
         # SCROLLABLE LIST
         self.list_scroll = ctk.CTkScrollableFrame(container, fg_color="transparent")
@@ -117,7 +119,7 @@ class DriverUpdaterView(ctk.CTkFrame):
         outdated_count = len(self.devices) - uptodate_count
 
         self.lbl_title.configure(text=f"Sürücü Taraması Tamamlandı: {len(self.devices)} Donanım Denetlendi")
-        self.lbl_sub.configure(text=f"✅ {uptodate_count} Güncel Sürücü  |  ⚠️ {outdated_count} Güncelleme Kontrolü Önerilen")
+        self.lbl_sub.configure(text="Güncelleme durumunu Windows Update üzerinden denetleyin.")
 
         self._filter_list()
 
@@ -142,15 +144,13 @@ class DriverUpdaterView(ctk.CTkFrame):
         for d in self.filtered_devices[:70]:
             row = ctk.CTkFrame(self.list_scroll, fg_color=CCleanerTheme.DARK_BG_CARD, height=48, corner_radius=8, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
             row.pack(fill="x", pady=3)
-            row.pack_propagate(False)
+            row.grid_propagate(True)
 
             # Name & MFG
             name_box = ctk.CTkFrame(row, fg_color="transparent")
-            name_box.place(relx=0.03, rely=0.5, anchor="w")
+            ctk.table_cell(name_box, 0.03)
 
             d_name = d["name"]
-            if len(d_name) > 42:
-                d_name = d_name[:40] + "..."
             lbl_name = ctk.CTkLabel(name_box, text=d_name, font=ctk.CTkFont(size=12, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY, anchor="w")
             lbl_name.pack(anchor="w")
 
@@ -159,15 +159,15 @@ class DriverUpdaterView(ctk.CTkFrame):
 
             # Category
             lbl_cat = ctk.CTkLabel(row, text=d["category"], font=ctk.CTkFont(size=11), text_color=CCleanerTheme.DARK_TEXT_SECONDARY)
-            lbl_cat.place(relx=0.45, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_cat, 0.45)
 
             # Version / Date
             lbl_ver = ctk.CTkLabel(row, text=f"{d['version']} ({d['date']})", font=ctk.CTkFont(size=11), text_color=CCleanerTheme.DARK_TEXT_MUTED)
-            lbl_ver.place(relx=0.64, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_ver, 0.64)
 
             # Status pill & action
             status_box = ctk.CTkFrame(row, fg_color="transparent")
-            status_box.place(relx=0.82, rely=0.5, anchor="w")
+            ctk.table_cell(status_box, 0.82)
 
             pill = ctk.CTkLabel(
                 status_box,
@@ -192,15 +192,11 @@ class DriverUpdaterView(ctk.CTkFrame):
                 btn_up.pack(side="left")
 
     def _update_single_driver(self, dev):
-        dev["status_str"] = "Güncel"
-        dev["status_color"] = CCleanerTheme.SUCCESS
-        dev["date"] = "2026-09-18"
-        self._filter_list()
+        self._update_all_drivers()
 
     def _update_all_drivers(self):
-        for d in self.devices:
-            d["status_str"] = "Güncel"
-            d["status_color"] = CCleanerTheme.SUCCESS
-            d["date"] = "2026-09-18"
-        self._filter_list()
-        self.lbl_sub.configure(text=f"✅ Tüm {len(self.devices)} Sürücü Başarıyla Güncellendi!")
+        try:
+            os.startfile("ms-settings:windowsupdate-optionalupdates")
+        except OSError as exc:
+            from tkinter import messagebox
+            messagebox.showerror("TerTemiz", str(exc), parent=self)

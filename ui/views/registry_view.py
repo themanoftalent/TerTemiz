@@ -1,4 +1,4 @@
-import customtkinter as ctk
+from ui import widgets as ctk
 import threading
 import time
 import os
@@ -69,8 +69,8 @@ class RegistryView(ctk.CTkFrame):
             btn_box,
             text="Sorunları Tara",
             font=ctk.CTkFont(size=13, weight="bold"),
-            fg_color="#374151",
-            hover_color="#4b5563",
+            fg_color=CCleanerTheme.BG_INPUT,
+            hover_color=CCleanerTheme.BG_CARD_HOVER,
             corner_radius=18,
             height=38,
             command=self._start_scan
@@ -182,21 +182,21 @@ class RegistryView(ctk.CTkFrame):
         # Table header inside scroll
         th = ctk.CTkFrame(self.issues_scroll, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, height=32, corner_radius=6)
         th.pack(fill="x", pady=(0, 4))
-        th.pack_propagate(False)
+        th.grid_propagate(True)
 
-        ctk.CTkLabel(th, text="Sorun Açıklaması", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.04, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Veri / Dosya Yolu", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.45, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Kayıt Anahtarı", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.76, rely=0.5, anchor="w")
+        ctk.table_cell(ctk.CTkLabel(th, text="Sorun Açıklaması", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.04)
+        ctk.table_cell(ctk.CTkLabel(th, text="Veri / Dosya Yolu", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.45)
+        ctk.table_cell(ctk.CTkLabel(th, text="Kayıt Anahtarı", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.76)
 
         self.issue_checkboxes = []
         for iss in self.issues:
             row = ctk.CTkFrame(self.issues_scroll, fg_color=CCleanerTheme.DARK_BG_MAIN, height=42, corner_radius=6, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
             row.pack(fill="x", pady=2)
-            row.pack_propagate(False)
+            row.grid_propagate(True)
 
             var = ctk.BooleanVar(value=True)
             cb = ctk.CTkCheckBox(row, text="", variable=var, width=20, fg_color=CCleanerTheme.PRIMARY, corner_radius=4)
-            cb.place(relx=0.015, rely=0.5, anchor="w")
+            ctk.table_cell(cb, 0.015)
 
             def on_toggle(v=var, issue=iss):
                 issue.selected = v.get()
@@ -206,21 +206,19 @@ class RegistryView(ctk.CTkFrame):
             # Problem
             p_text = f"[{iss.category}] {iss.problem}"
             lbl_prob = ctk.CTkLabel(row, text=p_text, font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY)
-            lbl_prob.place(relx=0.06, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_prob, 0.06)
 
             # Data
             d_text = str(iss.data)
-            if len(d_text) > 40:
-                d_text = d_text[:20] + "..." + d_text[-18:]
             lbl_data = ctk.CTkLabel(row, text=d_text, font=ctk.CTkFont(size=11), text_color="#38bdf8")
-            lbl_data.place(relx=0.45, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_data, 0.45)
 
             # Key
             k_text = iss.key_path
             if len(k_text) > 30:
                 k_text = "..." + k_text[-28:]
             lbl_k = ctk.CTkLabel(row, text=k_text, font=ctk.CTkFont(size=10), text_color=CCleanerTheme.DARK_TEXT_MUTED)
-            lbl_k.place(relx=0.76, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_k, 0.76)
 
     def _prompt_fix_issues(self):
         # Classic CCleaner backup prompt modal
@@ -261,7 +259,7 @@ class RegistryView(ctk.CTkFrame):
         btn_yes = ctk.CTkButton(btn_box, text="Evet (Yedekle & Düzelt)", fg_color=CCleanerTheme.PRIMARY, hover_color=CCleanerTheme.PRIMARY_HOVER, corner_radius=18, width=170, command=on_backup_and_fix)
         btn_yes.pack(side="left", padx=6)
 
-        btn_no = ctk.CTkButton(btn_box, text="Hayır (Yedeklemeden)", fg_color="#374151", hover_color="#4b5563", corner_radius=18, width=150, command=on_fix_without_backup)
+        btn_no = ctk.CTkButton(btn_box, text="Hayır (Yedeklemeden)", fg_color=CCleanerTheme.BG_INPUT, hover_color=CCleanerTheme.BG_CARD_HOVER, corner_radius=18, width=150, command=on_fix_without_backup)
         btn_no.pack(side="left", padx=6)
 
         btn_cancel = ctk.CTkButton(btn_box, text="İptal", fg_color="transparent", border_width=1, border_color="#4b5563", hover_color="#374151", corner_radius=18, width=80, command=dialog.destroy)

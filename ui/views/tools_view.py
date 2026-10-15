@@ -1,4 +1,4 @@
-import customtkinter as ctk
+from ui import widgets as ctk
 import os
 import subprocess
 import threading
@@ -82,8 +82,8 @@ class ToolsView(ctk.CTkFrame):
             top_bar,
             text="Girdiyi Sil",
             font=ctk.CTkFont(size=12),
-            fg_color="#374151",
-            hover_color="#4b5563",
+            fg_color=CCleanerTheme.BG_INPUT,
+            hover_color=CCleanerTheme.BG_CARD_HOVER,
             corner_radius=17,
             height=34,
             width=110,
@@ -94,12 +94,12 @@ class ToolsView(ctk.CTkFrame):
         # Table header
         th = ctk.CTkFrame(parent, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, height=32, corner_radius=6)
         th.pack(fill="x", pady=(0, 4))
-        th.pack_propagate(False)
+        th.grid_propagate(True)
 
-        ctk.CTkLabel(th, text="Program Adı", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.03, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Yayımcı", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.45, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Yükleme Tarihi", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.68, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Boyut", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.85, rely=0.5, anchor="w")
+        ctk.table_cell(ctk.CTkLabel(th, text="Program Adı", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.03)
+        ctk.table_cell(ctk.CTkLabel(th, text="Yayımcı", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.45)
+        ctk.table_cell(ctk.CTkLabel(th, text="Yükleme Tarihi", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.68)
+        ctk.table_cell(ctk.CTkLabel(th, text="Boyut", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.85)
 
         self.uninstall_scroll = ctk.CTkScrollableFrame(parent, fg_color="transparent")
         self.uninstall_scroll.pack(fill="both", expand=True)
@@ -131,25 +131,21 @@ class ToolsView(ctk.CTkFrame):
         for p in filtered:
             row = ctk.CTkFrame(self.uninstall_scroll, fg_color=CCleanerTheme.DARK_BG_CARD, height=40, corner_radius=6, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
             row.pack(fill="x", pady=2)
-            row.pack_propagate(False)
+            row.grid_propagate(True)
 
             p_name = p["name"]
-            if len(p_name) > 38:
-                p_name = p_name[:36] + "..."
             lbl_name = ctk.CTkLabel(row, text=p_name, font=ctk.CTkFont(size=12, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY)
-            lbl_name.place(relx=0.03, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_name, 0.03)
 
             pub = p["publisher"]
-            if len(pub) > 22:
-                pub = pub[:20] + "..."
             lbl_pub = ctk.CTkLabel(row, text=pub, font=ctk.CTkFont(size=11), text_color=CCleanerTheme.DARK_TEXT_MUTED)
-            lbl_pub.place(relx=0.45, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_pub, 0.45)
 
             lbl_date = ctk.CTkLabel(row, text=p["install_date"], font=ctk.CTkFont(size=11), text_color=CCleanerTheme.DARK_TEXT_MUTED)
-            lbl_date.place(relx=0.68, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_date, 0.68)
 
             lbl_sz = ctk.CTkLabel(row, text=p["size_str"], font=ctk.CTkFont(size=11), text_color=CCleanerTheme.DARK_TEXT_SECONDARY)
-            lbl_sz.place(relx=0.85, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_sz, 0.85)
 
             def on_click(event, target=p, target_row=row):
                 self.selected_prog = target
@@ -197,11 +193,11 @@ class ToolsView(ctk.CTkFrame):
 
         th = ctk.CTkFrame(parent, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, height=32, corner_radius=6)
         th.pack(fill="x", pady=(0, 4))
-        th.pack_propagate(False)
+        th.grid_propagate(True)
 
-        ctk.CTkLabel(th, text="Program / Girdi", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.03, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Dosya Komutu", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.35, rely=0.5, anchor="w")
-        ctk.CTkLabel(th, text="Konum", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.75, rely=0.5, anchor="w")
+        ctk.table_cell(ctk.CTkLabel(th, text="Program / Girdi", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.03)
+        ctk.table_cell(ctk.CTkLabel(th, text="Dosya Komutu", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.35)
+        ctk.table_cell(ctk.CTkLabel(th, text="Konum", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.75)
 
         self.startup_scroll = ctk.CTkScrollableFrame(parent, fg_color="transparent")
         self.startup_scroll.pack(fill="both", expand=True)
@@ -218,19 +214,19 @@ class ToolsView(ctk.CTkFrame):
         for itm in items:
             row = ctk.CTkFrame(self.startup_scroll, fg_color=CCleanerTheme.DARK_BG_CARD, height=42, corner_radius=6, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
             row.pack(fill="x", pady=2)
-            row.pack_propagate(False)
+            row.grid_propagate(True)
 
             lbl_name = ctk.CTkLabel(row, text=itm["name"], font=ctk.CTkFont(size=12, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY)
-            lbl_name.place(relx=0.03, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_name, 0.03)
 
             cmd = itm["command"]
             if len(cmd) > 42:
                 cmd = cmd[:20] + "..." + cmd[-20:]
             lbl_cmd = ctk.CTkLabel(row, text=cmd, font=ctk.CTkFont(size=11), text_color=CCleanerTheme.DARK_TEXT_MUTED)
-            lbl_cmd.place(relx=0.35, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_cmd, 0.35)
 
             lbl_loc = ctk.CTkLabel(row, text=itm["location"], font=ctk.CTkFont(size=11), text_color="#38bdf8")
-            lbl_loc.place(relx=0.75, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_loc, 0.75)
 
             def on_click(event, target=itm, target_row=row):
                 self.selected_startup = target
@@ -307,9 +303,9 @@ class ToolsView(ctk.CTkFrame):
             cf.pack(fill="x", pady=2)
             cf.pack_propagate(False)
 
-            ctk.CTkLabel(cf, text=cat["name"], font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY).place(relx=0.03, rely=0.5, anchor="w")
-            ctk.CTkLabel(cf, text=f"{cat['size_str']}  (%{cat['percent']})", font=ctk.CTkFont(size=11), text_color=CCleanerTheme.PRIMARY).place(relx=0.35, rely=0.5, anchor="w")
-            ctk.CTkLabel(cf, text=f"{cat['count']} dosya", font=ctk.CTkFont(size=11), text_color=CCleanerTheme.DARK_TEXT_MUTED).place(relx=0.65, rely=0.5, anchor="w")
+            ctk.table_cell(ctk.CTkLabel(cf, text=cat["name"], font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY), 0.03)
+            ctk.table_cell(ctk.CTkLabel(cf, text=f"{cat['size_str']}  (%{cat['percent']})", font=ctk.CTkFont(size=11), text_color=CCleanerTheme.PRIMARY), 0.35)
+            ctk.table_cell(ctk.CTkLabel(cf, text=f"{cat['count']} dosya", font=ctk.CTkFont(size=11), text_color=CCleanerTheme.DARK_TEXT_MUTED), 0.65)
 
         # Render top files
         for w in self.disk_results_scroll.winfo_children():
@@ -318,13 +314,13 @@ class ToolsView(ctk.CTkFrame):
         for f in res["top_files"]:
             row = ctk.CTkFrame(self.disk_results_scroll, fg_color=CCleanerTheme.DARK_BG_CARD, height=38, corner_radius=6, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
             row.pack(fill="x", pady=2)
-            row.pack_propagate(False)
+            row.grid_propagate(True)
 
             fn = f["filename"]
             if len(fn) > 40:
                 fn = fn[:38] + "..."
-            ctk.CTkLabel(row, text=fn, font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY).place(relx=0.03, rely=0.5, anchor="w")
-            ctk.CTkLabel(row, text=f["size_str"], font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.PRIMARY).place(relx=0.6, rely=0.5, anchor="w")
+            ctk.table_cell(ctk.CTkLabel(row, text=fn, font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY), 0.03)
+            ctk.table_cell(ctk.CTkLabel(row, text=f["size_str"], font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.PRIMARY), 0.6)
 
             btn_open = ctk.CTkButton(
                 row,
@@ -332,12 +328,12 @@ class ToolsView(ctk.CTkFrame):
                 width=80,
                 height=24,
                 font=ctk.CTkFont(size=10),
-                fg_color="#374151",
-                hover_color="#4b5563",
+                fg_color=CCleanerTheme.BG_INPUT,
+                hover_color=CCleanerTheme.BG_CARD_HOVER,
                 corner_radius=12,
                 command=lambda p=f["path"]: subprocess.run(f'explorer /select,"{p}"', shell=True)
             )
-            btn_open.place(relx=0.82, rely=0.5, anchor="w")
+            ctk.table_cell(btn_open, 0.82)
 
     # 4. DUPLICATE FINDER TAB
     def _build_dup_tab(self):
@@ -448,7 +444,7 @@ class ToolsView(ctk.CTkFrame):
         for title, val, icon in specs:
             row = ctk.CTkFrame(card, fg_color=CCleanerTheme.DARK_BG_MAIN, height=52, corner_radius=8)
             row.pack(fill="x", padx=25, pady=6)
-            row.pack_propagate(False)
+            row.grid_propagate(True)
 
-            ctk.CTkLabel(row, text=f"{icon}  {title}", font=ctk.CTkFont(size=13, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.03, rely=0.5, anchor="w")
-            ctk.CTkLabel(row, text=val, font=ctk.CTkFont(size=13, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY).place(relx=0.35, rely=0.5, anchor="w")
+            ctk.table_cell(ctk.CTkLabel(row, text=f"{icon}  {title}", font=ctk.CTkFont(size=13, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.03)
+            ctk.table_cell(ctk.CTkLabel(row, text=val, font=ctk.CTkFont(size=13, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY), 0.35)

@@ -1,4 +1,4 @@
-import customtkinter as ctk
+from ui import widgets as ctk
 import threading
 from core.optimizer import ProcessOptimizer
 from core.system_info import get_ram_info
@@ -76,8 +76,8 @@ class PerformanceOptimizerView(ctk.CTkFrame):
             toolbar,
             text="🔄 Yenile",
             font=ctk.CTkFont(size=12),
-            fg_color="#374151",
-            hover_color="#4b5563",
+            fg_color=CCleanerTheme.BG_INPUT,
+            hover_color=CCleanerTheme.BG_CARD_HOVER,
             corner_radius=18,
             width=90,
             height=36,
@@ -88,12 +88,12 @@ class PerformanceOptimizerView(ctk.CTkFrame):
         # TABLE HEADER
         tbl_header = ctk.CTkFrame(container, fg_color=CCleanerTheme.DARK_BG_SIDEBAR, height=36, corner_radius=6)
         tbl_header.pack(fill="x", pady=(0, 4))
-        tbl_header.pack_propagate(False)
+        tbl_header.grid_propagate(True)
 
-        ctk.CTkLabel(tbl_header, text="Uygulama Adı (PID)", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.03, rely=0.5, anchor="w")
-        ctk.CTkLabel(tbl_header, text="RAM Kullanımı", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.45, rely=0.5, anchor="w")
-        ctk.CTkLabel(tbl_header, text="Sistem Etkisi", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.62, rely=0.5, anchor="w")
-        ctk.CTkLabel(tbl_header, text="Eylemler", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY).place(relx=0.82, rely=0.5, anchor="w")
+        ctk.table_cell(ctk.CTkLabel(tbl_header, text="Uygulama Adı (PID)", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.03)
+        ctk.table_cell(ctk.CTkLabel(tbl_header, text="RAM Kullanımı", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.45)
+        ctk.table_cell(ctk.CTkLabel(tbl_header, text="Sistem Etkisi", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.62)
+        ctk.table_cell(ctk.CTkLabel(tbl_header, text="Eylemler", font=ctk.CTkFont(size=11, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_SECONDARY), 0.82)
 
         # SCROLLABLE PROCESS LIST
         self.list_scroll = ctk.CTkScrollableFrame(container, fg_color="transparent")
@@ -133,16 +133,16 @@ class PerformanceOptimizerView(ctk.CTkFrame):
         for a in self.filtered_apps[:80]:
             row = ctk.CTkFrame(self.list_scroll, fg_color=CCleanerTheme.DARK_BG_CARD, height=44, corner_radius=8, border_width=1, border_color=CCleanerTheme.DARK_BORDER)
             row.pack(fill="x", pady=3)
-            row.pack_propagate(False)
+            row.grid_propagate(True)
 
             # Name & PID
             name_text = f"{a['name']}  (PID: {a['pid']})"
             lbl_name = ctk.CTkLabel(row, text=name_text, font=ctk.CTkFont(size=12, weight="bold"), text_color=CCleanerTheme.DARK_TEXT_PRIMARY)
-            lbl_name.place(relx=0.03, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_name, 0.03)
 
             # RAM MB
             lbl_ram = ctk.CTkLabel(row, text=f"{a['memory_mb']} MB", font=ctk.CTkFont(size=12), text_color="#38bdf8")
-            lbl_ram.place(relx=0.45, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_ram, 0.45)
 
             # Impact badge
             lbl_impact = ctk.CTkLabel(
@@ -151,11 +151,11 @@ class PerformanceOptimizerView(ctk.CTkFrame):
                 font=ctk.CTkFont(size=12, weight="bold"), 
                 text_color=a['impact_color']
             )
-            lbl_impact.place(relx=0.62, rely=0.5, anchor="w")
+            ctk.table_cell(lbl_impact, 0.62)
 
             # Actions
             btn_frame = ctk.CTkFrame(row, fg_color="transparent")
-            btn_frame.place(relx=0.82, rely=0.5, anchor="w")
+            ctk.table_cell(btn_frame, 0.82)
 
             if not a["is_sleeping"]:
                 btn_sleep = ctk.CTkButton(
@@ -164,8 +164,8 @@ class PerformanceOptimizerView(ctk.CTkFrame):
                     width=65,
                     height=28,
                     font=ctk.CTkFont(size=11),
-                    fg_color="#374151",
-                    hover_color="#4b5563",
+                    fg_color=CCleanerTheme.BG_INPUT,
+                    hover_color=CCleanerTheme.BG_CARD_HOVER,
                     corner_radius=14,
                     command=lambda pid=a["pid"]: self._toggle_sleep(pid, True)
                 )

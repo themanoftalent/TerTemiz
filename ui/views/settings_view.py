@@ -1,10 +1,13 @@
-import customtkinter as ctk
+from ui import widgets as ctk
 from ui.theme import CCleanerTheme
+from ui.i18n import tr
 
 class SettingsView(ctk.CTkFrame):
-    def __init__(self, parent, on_theme_change=None):
+    def __init__(self, parent, preferences=None, on_theme_change=None, on_language_change=None):
         super().__init__(parent, fg_color="transparent")
+        self.preferences = preferences or {"theme": "system", "language": "tr"}
         self.on_theme_change = on_theme_change
+        self.on_language_change = on_language_change
         self._build_ui()
 
     def _build_ui(self):
@@ -29,7 +32,7 @@ class SettingsView(ctk.CTkFrame):
         tab_about = tabs.add("ℹ️ Hakkında & Lisans")
 
         # 1. GENEL AYARLAR
-        card_gen = ctk.CTkFrame(
+        card_gen = ctk.CTkScrollableFrame(
             tab_gen, 
             fg_color=CCleanerTheme.BG_CARD, 
             corner_radius=12, 
@@ -56,12 +59,12 @@ class SettingsView(ctk.CTkFrame):
             text_color=CCleanerTheme.TEXT_SECONDARY
         ).pack(side="left")
 
-        current_mode = ctk.get_appearance_mode()
-        default_val = "Koyu (Dark)" if current_mode == "Dark" else "Açık (Light)"
+        self.theme_choices = {tr("Koyu (Dark)"): "dark", tr("Açık (Light)"): "light", tr("Sistem Teması"): "system"}
+        default_val = next(label for label, value in self.theme_choices.items() if value == self.preferences["theme"])
 
         self.theme_menu = ctk.CTkOptionMenu(
             row_theme,
-            values=["Koyu (Dark)", "Açık (Light)", "Sistem"],
+            values=list(self.theme_choices),
             fg_color=CCleanerTheme.PRIMARY,
             button_color=CCleanerTheme.PRIMARY_HOVER,
             text_color="#ffffff",
@@ -86,8 +89,10 @@ class SettingsView(ctk.CTkFrame):
             values=["Türkçe", "English"],
             fg_color=CCleanerTheme.BG_INPUT,
             button_color=CCleanerTheme.BG_CARD_HOVER,
-            text_color=CCleanerTheme.TEXT_PRIMARY
+            text_color=CCleanerTheme.TEXT_PRIMARY,
+            command=self._change_language
         )
+        self.lang_menu.set("English" if self.preferences["language"] == "en" else "Türkçe")
         self.lang_menu.pack(side="right")
 
         # Toggles
@@ -128,7 +133,7 @@ class SettingsView(ctk.CTkFrame):
         cb3.pack(anchor="w", padx=20, pady=6)
 
         # 2. AKILLI TEMİZLEME
-        card_smart = ctk.CTkFrame(
+        card_smart = ctk.CTkScrollableFrame(
             tab_smart, 
             fg_color=CCleanerTheme.BG_CARD, 
             corner_radius=12, 
@@ -180,7 +185,7 @@ class SettingsView(ctk.CTkFrame):
         sw2.pack(anchor="w", padx=20, pady=8)
 
         # 3. HAKKINDA & LİSANS
-        card_about = ctk.CTkFrame(
+        card_about = ctk.CTkScrollableFrame(
             tab_about, 
             fg_color=CCleanerTheme.BG_CARD, 
             corner_radius=12, 
@@ -215,12 +220,20 @@ class SettingsView(ctk.CTkFrame):
             justify="center"
         ).pack(pady=25)
 
+    def refresh_language(self):
+        self.theme_choices = {tr("Koyu (Dark)"): "dark", tr("Açık (Light)"): "light", tr("Sistem Teması"): "system"}
+        self.theme_menu.configure(values=list(self.theme_choices))
+        self.theme_menu.set(next(label for label, mode in self.theme_choices.items() if mode == self.preferences["theme"]))
+
     def _change_theme(self, choice):
-        if "Açık" in choice:
-            ctk.set_appearance_mode("light")
-        elif "Koyu" in choice:
-            ctk.set_appearance_mode("dark")
-        else:
-            ctk.set_appearance_mode("system")
+        mode = self.theme_choices[choice]
+        self.preferences["theme"] = mode
         if self.on_theme_change:
-            self.on_theme_change()
+            self.on_theme_change(mode)
+        else:
+            ctk.set_appearance_mode(mode)
+
+    def _change_language(self, choice):
+        language = "en" if choice == "English" else "tr"
+        if self.on_language_change:
+            self.on_language_change(language)

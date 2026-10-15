@@ -57,10 +57,10 @@ class DriverScanner:
                     "manufacturer": mfg,
                     "driver_file": drv,
                     "category": category,
-                    "status_str": "Güncel" if is_uptodate else "Güncelleme Mevcut",
-                    "status_color": "#10b981" if is_uptodate else "#f59e0b",
-                    "version": "10.0.26200.1" if not is_oem else "31.0.101.4578",
-                    "date": "2024-05-12" if is_oem else "2023-11-20"
+                    "status_str": "Windows Update ile denetle",
+                    "status_color": "#f59e0b",
+                    "version": "—",
+                    "date": "—"
                 })
 
                 if on_progress and idx % 10 == 0:

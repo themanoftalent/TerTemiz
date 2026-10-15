@@ -1,4 +1,4 @@
-import customtkinter as ctk
+from ui import widgets as ctk
 import threading
 import time
 from core.cleaner import SystemCleaner, build_default_rules
@@ -301,7 +301,7 @@ class CustomCleanView(ctk.CTkFrame):
         btn_yes = ctk.CTkButton(btn_box, text="Evet, Temizle", fg_color=CCleanerTheme.PRIMARY, hover_color=CCleanerTheme.PRIMARY_HOVER, corner_radius=18, width=120, command=do_clean)
         btn_yes.pack(side="left", padx=8)
 
-        btn_no = ctk.CTkButton(btn_box, text="İptal", fg_color="#374151", hover_color="#4b5563", corner_radius=18, width=100, command=dialog.destroy)
+        btn_no = ctk.CTkButton(btn_box, text="İptal", fg_color=CCleanerTheme.BG_INPUT, hover_color=CCleanerTheme.BG_CARD_HOVER, corner_radius=18, width=100, command=dialog.destroy)
         btn_no.pack(side="left", padx=8)
 
     def _execute_clean(self):
