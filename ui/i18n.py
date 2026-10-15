@@ -24,7 +24,7 @@ EN = {
 "Temizleme işleminden sonra özet bildirim penceresi göster": "Show a summary after cleaning",
 "Akıllı Temizlemeyi Etkinleştir": "Enable Smart Cleaning",
 "Tarayıcılar kapandığında önbelleği otomatik temizle": "Clean the cache when browsers close",
-"Sürüm 7.0.1 Pro (64-bit)": "Version 7.0.1 Pro (64-bit)",
+"Sürüm 7.0.2 Pro (64-bit)": "Version 7.0.2 Pro (64-bit)",
 "Modern Windows Sistem Temizleme ve Performans Paketi": "Windows System Cleaning and Performance Suite",
 "👑 TerTemiz Professional Lisansı": "👑 TerTemiz Professional License",
 "Durum: Süresiz Aktif (Ömür Boyu Pro)": "Status: Active (Lifetime Pro)",
@@ -147,6 +147,47 @@ TEMPLATES = {
 "Temizlenmeye hazır {size} gereksiz dosya ve optimize edilebilecek arka plan uygulamaları bulundu.": "Found {size} of unnecessary files and background apps to optimize.",
 }
 
+TEMPLATES.update({'{count} yüksek bellek tüketimi': '{count} high-memory apps',
+ 'Analiz Tamamlandı: {size} kaldırılabilir dosya ({count} Öğe)': 'Analysis Complete: {size} removable files '
+                                                                 '({count} Items)',
+ 'Seçilen {size} boyutundaki gereksiz dosyalar\nkalıcı olarak silinecektir.\nDevam etmek istiyor musunuz?': 'Selected '
+                                                                                                            'files '
+                                                                                                            'totaling '
+                                                                                                            '{size} '
+                                                                                                            'will '
+                                                                                                            'be '
+                                                                                                            'permanently '
+                                                                                                            'deleted.\n'
+                                                                                                            'Continue?',
+ 'Temizleme Tamamlandı: {size} Alan Açıldı! 🎉': 'Cleanup Complete: {size} Freed! 🎉',
+ '{count} dosya   ': '{count} files   ',
+ 'Örnek: {path}': 'Example: {path}',
+ '{size} Boşaltıldı': '{size} Freed',
+ 'Analiz ediliyor: {name} ({current}/{total})': 'Analyzing: {name} ({current}/{total})',
+ 'Temizlenen Alan: {size}  •  Rahatlatılan RAM: {ram} MB\nWeb izleyicileri ve geçici sistem çöpleri başarıyla temizlendi.': 'Space '
+                                                                                                                            'Freed: '
+                                                                                                                            '{size}  '
+                                                                                                                            '•  '
+                                                                                                                            'RAM '
+                                                                                                                            'Freed: '
+                                                                                                                            '{ram} '
+                                                                                                                            'MB\n'
+                                                                                                                            'Web '
+                                                                                                                            'trackers '
+                                                                                                                            'and '
+                                                                                                                            'temporary '
+                                                                                                                            'files '
+                                                                                                                            'were '
+                                                                                                                            'cleaned.',
+ '{count} dosya': '{count} files',
+ 'Dosya Boyutu: {size}  |  Gereksiz Kaplanan Alan: {waste}': 'File Size: {size}  |  Wasted Space: {waste}',
+ 'Tarama Tamamlandı: {count} Sorun Bulundu! ⚠️': 'Scan Complete: {count} Issues Found! ⚠️',
+ '{count} sorun başarıyla çözüldü.': '{count} issues repaired.',
+ '{count} Kayıt Defteri Sorunu Başarıyla Düzeltildi!': '{count} Registry Issues Repaired!',
+ 'Sürücü Taraması Tamamlandı: {count} Donanım Denetlendi': 'Driver Scan Complete: {count} Devices Checked',
+ '● {status}': '● {status}',
+ '[{category}] {name}': '[{category}] {name}'})
+
 def set_language(language):
     global _language
     _language = language if language in ("tr", "en") else "tr"
@@ -170,5 +211,5 @@ def tr(text):
     for pattern, target in _patterns:
         match = pattern.fullmatch(text)
         if match:
-            return target.format(**match.groupdict())
+            return target.format(**{key: tr(value) for key, value in match.groupdict().items()})
     return text

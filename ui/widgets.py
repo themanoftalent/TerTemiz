@@ -94,13 +94,13 @@ class CTkLabel(_Localized, _ctk.CTkLabel):
 
 class CTkButton(_Localized, _ctk.CTkButton):
     def __init__(self, *args, **kwargs):
-        if kwargs.get("fg_color") == CCleanerTheme.BG_INPUT:
+        if kwargs.get("fg_color") in (CCleanerTheme.BG_INPUT, CCleanerTheme.BG_CARD, CCleanerTheme.BG_CARD_HOVER):
             kwargs.setdefault("text_color", CCleanerTheme.TEXT_PRIMARY)
         super().__init__(*args, **kwargs)
 
     def configure(self, require_redraw=False, **kwargs):
         if "fg_color" in kwargs:
-            kwargs.setdefault("text_color", CCleanerTheme.TEXT_PRIMARY if kwargs["fg_color"] == CCleanerTheme.BG_INPUT else "#ffffff")
+            kwargs.setdefault("text_color", CCleanerTheme.TEXT_PRIMARY if kwargs["fg_color"] in (CCleanerTheme.BG_INPUT, CCleanerTheme.BG_CARD, CCleanerTheme.BG_CARD_HOVER) else "#ffffff")
         return super().configure(require_redraw=require_redraw, **kwargs)
 class CTkCheckBox(_Localized, _ctk.CTkCheckBox):
     pass

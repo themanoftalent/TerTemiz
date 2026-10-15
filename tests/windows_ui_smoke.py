@@ -30,8 +30,8 @@ with tempfile.TemporaryDirectory() as directory, contextlib.ExitStack() as stack
     app = TerTemizApp()
     app.report_callback_exception = lambda *args: errors.append(str(args))
     try:
-        for size in ['1280x820', '1024x700']:
-            app.geometry(size)
+        for size in ['1000x700', '960x640']:
+            app.geometry(size + "+0+0")
             for tab in ['health_check', 'custom_clean', 'performance', 'updater', 'driver_updater', 'registry', 'tools', 'settings']:
                 app._navigate_to(tab)
                 app.update()
@@ -58,6 +58,7 @@ with tempfile.TemporaryDirectory() as directory, contextlib.ExitStack() as stack
         app.update()
         for label, expected in [('Light', 'Light'), ('Dark', 'Dark'), ('System Theme', None)]:
             app._navigate_to('settings')
+            settings.theme_menu.set(label)
             settings._change_theme(label)
             app.update()
             if expected:
