@@ -68,6 +68,7 @@ class CTkLabel(_Localized, _ctk.CTkLabel):
             kwargs["wraplength"] = 100
         super().__init__(master, **kwargs)
         self._wrap_binding = tkinter.Misc.bind(master, "<Configure>", self._wrap_to_parent, add="+")
+        tkinter.Misc.bind(self, "<Configure>", self._wrap_grid_cell, add="+")
 
     def pack(self, **kwargs):
         if getattr(self.master, "_table_constrained", False):
@@ -83,13 +84,22 @@ class CTkLabel(_Localized, _ctk.CTkLabel):
             self._wrap_binding = None
         super().destroy()
 
+    def _wrap_grid_cell(self, event):
+        if self.winfo_manager() == "grid":
+            self._set_wrap_width(event.width, 16)
+
+    def _set_wrap_width(self, width, padding):
+        width = max(40, self._reverse_widget_scaling(width) - padding)
+        if self.cget("wraplength") != width:
+            self.configure(wraplength=width)
+
     def _wrap_to_parent(self, event):
         # A grid cell has its own allocated column width. Packed labels use the
         # parent's width so paragraphs can grow vertically instead of clipping.
-        width = self.winfo_width() if self.winfo_manager() == "grid" else event.width
-        width = max(40, self._reverse_widget_scaling(width) - 32)
-        if self.cget("wraplength") != width:
-            self.configure(wraplength=width)
+        if self.winfo_manager() == "grid":
+            self._set_wrap_width(self.winfo_width(), 16)
+        else:
+            self._set_wrap_width(event.width, 32)
 
 
 class CTkButton(_Localized, _ctk.CTkButton):

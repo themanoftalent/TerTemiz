@@ -53,6 +53,8 @@ with tempfile.TemporaryDirectory() as directory, contextlib.ExitStack() as stack
                 def check_action_buttons(widget):
                     if isinstance(widget, ctk.CTkButton) and getattr(widget.master, '_table_constrained', False) and widget.winfo_ismapped():
                         assert widget.winfo_width() >= widget.cget('font').measure(widget.cget('text')) + 8, widget.cget('text')
+                    if isinstance(widget, ctk.CTkLabel) and widget.winfo_manager() == 'grid' and widget.winfo_ismapped():
+                        assert widget.cget('wraplength') >= max(40, widget._reverse_widget_scaling(widget.winfo_width()) - 20)
                     for child in widget.winfo_children():
                         check_action_buttons(child)
                 check_action_buttons(app.views[tab])
