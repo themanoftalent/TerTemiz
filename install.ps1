@@ -62,7 +62,7 @@ $Shortcut = $WshShell.CreateShortcut($DesktopShortcut)
 $Shortcut.TargetPath = $ExePath
 $Shortcut.WorkingDirectory = $InstallDir
 $Shortcut.IconLocation = "$ExePath,0"
-$Shortcut.Description = "TerTemiz Professional 7.0.1"
+$Shortcut.Description = "TerTemiz Professional 7.0.2"
 $Shortcut.Save()
 
 # Start Menu shortcut
@@ -72,7 +72,7 @@ $Shortcut2 = $WshShell.CreateShortcut($StartShortcut)
 $Shortcut2.TargetPath = $ExePath
 $Shortcut2.WorkingDirectory = $InstallDir
 $Shortcut2.IconLocation = "$ExePath,0"
-$Shortcut2.Description = "TerTemiz Professional 7.0.1"
+$Shortcut2.Description = "TerTemiz Professional 7.0.2"
 $Shortcut2.Save()
 
 # 4. Register in Windows Programs and Features (Add/Remove Programs)
@@ -85,7 +85,7 @@ if (-not (Test-Path $RegKey)) {
 $InstallSize = (Get-ChildItem -Path $InstallDir -Recurse | Measure-Object -Property Length -Sum).Sum / 1KB
 
 Set-ItemProperty -Path $RegKey -Name "DisplayName" -Value "TerTemiz Professional"
-Set-ItemProperty -Path $RegKey -Name "DisplayVersion" -Value "7.0.1"
+Set-ItemProperty -Path $RegKey -Name "DisplayVersion" -Value "7.0.2"
 Set-ItemProperty -Path $RegKey -Name "Publisher" -Value "TerTemiz Software"
 Set-ItemProperty -Path $RegKey -Name "InstallLocation" -Value $InstallDir
 Set-ItemProperty -Path $RegKey -Name "DisplayIcon" -Value "$ExePath,0"

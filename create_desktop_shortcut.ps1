@@ -18,7 +18,7 @@ $Shortcut.TargetPath = $PythonwPath
 $Shortcut.Arguments = "`"$AppDir\main.py`""
 $Shortcut.WorkingDirectory = $AppDir
 $Shortcut.IconLocation = "$AppDir\assets\tertemiz_icon.ico, 0"
-$Shortcut.Description = "TerTemiz Professional 7.0.1"
+$Shortcut.Description = "TerTemiz Professional 7.0.2"
 $Shortcut.Save()
 
 Write-Host "Masaustu kisayolu TerTemiz olarak olusturuldu: $ShortcutPath"

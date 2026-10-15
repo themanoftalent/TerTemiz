@@ -86,12 +86,19 @@ class AppUpdater:
                 # Interactive installer permits UAC and license prompts when needed.
                 # Agreements are left to the user instead of being auto-accepted.
                 command = ["winget", "upgrade", "--id", pkg_id, "--exact", "--source", "winget", "--interactive"]
-                with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                      text=True, encoding="utf-8", errors="replace", shell=False,
-                                      **self._process_options()) as process:
-                    for line in process.stdout:
-                        if on_output and line.strip():
-                            on_output(ANSI.sub("", line).strip())
+                if os.name == "nt":
+                    # A real console is required for source/package license prompts.
+                    options = {"creationflags": subprocess.CREATE_NEW_CONSOLE}
+                    if on_output:
+                        on_output("Açılan WinGet penceresinde lisans ve yönetici izinlerini onaylayın. Sonuç burada gösterilecek.")
+                else:
+                    options = {"stdout": subprocess.PIPE, "stderr": subprocess.STDOUT,
+                               "text": True, "encoding": "utf-8", "errors": "replace"}
+                with subprocess.Popen(command, shell=False, **options) as process:
+                    if process.stdout is not None:
+                        for line in process.stdout:
+                            if on_output and line.strip():
+                                on_output(ANSI.sub("", line).strip())
                     code = process.wait()
                     success = code == 0
                     if not success and on_output:

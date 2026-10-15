@@ -19,6 +19,18 @@ class _Localized:
         if "placeholder_text" in kwargs:
             kwargs["placeholder_text"] = tr(kwargs["placeholder_text"])
         super().__init__(*args, **kwargs)
+        self._text_wrap_binding = None
+        if isinstance(self, (_ctk.CTkCheckBox, _ctk.CTkSwitch)):
+            self._text_wrap_binding = tkinter.Misc.bind(self.master, "<Configure>", lambda event: self.configure(text=self._source_text), add="+")
+
+    def destroy(self):
+        if getattr(self, "_text_wrap_binding", None):
+            try:
+                tkinter.Misc.unbind(self.master, "<Configure>", self._text_wrap_binding)
+            except tkinter.TclError:
+                pass
+            self._text_wrap_binding = None
+        super().destroy()
 
     def configure(self, require_redraw=False, **kwargs):
         if "text" in kwargs:
@@ -32,7 +44,10 @@ class _Localized:
     def _display_text(self, text):
         translated = tr(text)
         if isinstance(self, (_ctk.CTkCheckBox, _ctk.CTkSwitch)) and isinstance(translated, str):
-            return "\n".join(textwrap.fill(line, width=55) for line in translated.split("\n"))
+            parent = getattr(self, "master", None)
+            width = parent.winfo_width() if parent is not None else 0
+            characters = max(12, int((self._reverse_widget_scaling(width) - 52) / 7)) if width > 60 else 30
+            return "\n".join(textwrap.fill(line, width=characters) for line in translated.split("\n"))
         return translated
 
     def refresh_language(self):

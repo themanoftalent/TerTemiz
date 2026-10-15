@@ -195,7 +195,7 @@ class SettingsView(ctk.CTkFrame):
         card_about.pack(fill="both", expand=True, padx=10, pady=10)
 
         ctk.CTkLabel(card_about, text="TerTemiz", font=ctk.CTkFont(size=26, weight="bold"), text_color=CCleanerTheme.PRIMARY).pack(pady=(25, 4))
-        ctk.CTkLabel(card_about, text="Sürüm 7.0.1 Pro (64-bit)", font=ctk.CTkFont(size=13, weight="bold"), text_color=CCleanerTheme.TEXT_PRIMARY).pack(pady=2)
+        ctk.CTkLabel(card_about, text="Sürüm 7.0.2 Pro (64-bit)", font=ctk.CTkFont(size=13, weight="bold"), text_color=CCleanerTheme.TEXT_PRIMARY).pack(pady=2)
         ctk.CTkLabel(card_about, text="Modern Windows Sistem Temizleme ve Performans Paketi", font=ctk.CTkFont(size=12), text_color=CCleanerTheme.TEXT_SECONDARY).pack(pady=(0, 20))
 
         # License card

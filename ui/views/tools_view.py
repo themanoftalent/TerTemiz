@@ -33,11 +33,11 @@ class ToolsView(ctk.CTkFrame):
         )
         self.tool_tabs.pack(fill="both", expand=True)
 
-        self.tab_uninstall = self.tool_tabs.add("📦 Program Kaldırıcı")
-        self.tab_startup = self.tool_tabs.add("🚀 Başlangıç Yöneticisi")
-        self.tab_disk = self.tool_tabs.add("📊 Disk Alanı Analizi")
-        self.tab_dup = self.tool_tabs.add("🔍 Çift Dosya Bulucu")
-        self.tab_sysinfo = self.tool_tabs.add("ℹ️ Sistem Özellikleri")
+        self.tab_uninstall = self.tool_tabs.add("📦 Kaldırıcı")
+        self.tab_startup = self.tool_tabs.add("🚀 Başlangıç")
+        self.tab_disk = self.tool_tabs.add("📊 Disk Analizi")
+        self.tab_dup = self.tool_tabs.add("🔍 Çift Dosya")
+        self.tab_sysinfo = self.tool_tabs.add("ℹ️ Sistem")
 
         # Build each subtool view
         self._build_uninstall_tab()
