@@ -33,8 +33,12 @@ class TerTemizApp(ctk.CTk):
         ctk.set_default_color_theme("blue")
 
         self.title(f"TerTemiz Professional {APP_VERSION}")
-        self.geometry(f"{min(1280, self.winfo_screenwidth() - 40)}x{min(820, self.winfo_screenheight() - 80)}")
-        self.minsize(960, 600)
+        width = min(1280, self.winfo_screenwidth() - 40)
+        height = min(820, self.winfo_screenheight() - 120)
+        left = max(0, (self.winfo_screenwidth() - width) // 2)
+        top = max(0, (self.winfo_screenheight() - height) // 2 - 20)
+        self.geometry(f"{width}x{height}+{left}+{top}")
+        self.minsize(min(960, width), min(600, height))
 
         # Set Window Icon if exists
         icon_path = os.path.join(BASE_DIR, "assets", "tertemiz_icon.ico")

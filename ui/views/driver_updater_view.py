@@ -175,7 +175,7 @@ class DriverUpdaterView(ctk.CTkFrame):
                 font=ctk.CTkFont(size=11, weight="bold"),
                 text_color=d["status_color"]
             )
-            pill.pack(side="left", padx=(0, 10))
+            pill.pack(fill="x")
 
             if d["status_str"] != "Güncel":
                 btn_up = ctk.CTkButton(
@@ -189,7 +189,7 @@ class DriverUpdaterView(ctk.CTkFrame):
                     corner_radius=13,
                     command=lambda dev=d: self._update_single_driver(dev)
                 )
-                btn_up.pack(side="left")
+                btn_up.pack(fill="x", pady=(4, 0))
 
     def _update_single_driver(self, dev):
         self._update_all_drivers()

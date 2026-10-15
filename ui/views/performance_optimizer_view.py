@@ -169,7 +169,7 @@ class PerformanceOptimizerView(ctk.CTkFrame):
                     corner_radius=14,
                     command=lambda pid=a["pid"]: self._toggle_sleep(pid, True)
                 )
-                btn_sleep.pack(side="left", padx=3)
+                btn_sleep.pack(fill="x", padx=3, pady=3)
             else:
                 btn_wake = ctk.CTkButton(
                     btn_frame,
@@ -182,7 +182,7 @@ class PerformanceOptimizerView(ctk.CTkFrame):
                     corner_radius=14,
                     command=lambda pid=a["pid"]: self._toggle_sleep(pid, False)
                 )
-                btn_wake.pack(side="left", padx=3)
+                btn_wake.pack(fill="x", padx=3, pady=3)
 
             btn_kill = ctk.CTkButton(
                 btn_frame,
@@ -195,7 +195,7 @@ class PerformanceOptimizerView(ctk.CTkFrame):
                 corner_radius=14,
                 command=lambda pid=a["pid"]: self._terminate_app(pid)
             )
-            btn_kill.pack(side="left", padx=3)
+            btn_kill.pack(fill="x", padx=3, pady=3)
 
     def _toggle_sleep(self, pid, suspend=True):
         if suspend:

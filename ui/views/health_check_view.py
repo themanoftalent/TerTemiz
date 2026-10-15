@@ -83,7 +83,7 @@ class HealthCheckView(ctk.CTkFrame):
 
         # Start button
         start_btn = ctk.CTkButton(
-            center_box,
+            self,
             text="Taramayı Başlat",
             font=ctk.CTkFont(family=CCleanerTheme.FONT_FAMILY, size=16, weight="bold"),
             fg_color=CCleanerTheme.PRIMARY,
@@ -93,7 +93,7 @@ class HealthCheckView(ctk.CTkFrame):
             width=220,
             command=self._start_scan
         )
-        start_btn.pack(pady=(25, 30))
+        start_btn.pack(side="bottom", pady=(0, 15))
 
     def _build_scanning_view(self):
         center_box = ctk.CTkScrollableFrame(self, fg_color=CCleanerTheme.DARK_BG_CARD, corner_radius=16, border_width=1, border_color=CCleanerTheme.DARK_BORDER)

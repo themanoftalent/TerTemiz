@@ -40,11 +40,22 @@ with tempfile.TemporaryDirectory() as directory, contextlib.ExitStack() as stack
                     view.apps = [{'name': 'Long application name for responsive layout verification without ellipsis', 'id': 'Vendor.Example.LongPackageName', 'installed_version': '1.0.1234.5678', 'available_version': '2.0.1234.5678', 'status': 'Güncelleme Mevcut'}]
                     view._render_apps()
                     app.update()
+                if tab == 'performance':
+                    view = app.views[tab]
+                    view.apps = [{'name': 'Example app with long name', 'pid': 1234, 'memory_mb': 128, 'impact': 'Yüksek', 'impact_color': '#f59e0b', 'is_sleeping': False}]
+                    view._filter_apps()
+                    app.update()
                 if tab == 'driver_updater':
                     view = app.views[tab]
                     view.devices = [{'name': 'Long graphics adapter name for responsive layout verification', 'manufacturer': 'Example Manufacturer', 'category': 'Grafik & Ekran', 'version': '—', 'date': '—', 'status_str': 'Windows Update ile denetle', 'status_color': '#f59e0b'}]
                     view._render_devices()
                     app.update()
+                def check_action_buttons(widget):
+                    if isinstance(widget, ctk.CTkButton) and getattr(widget.master, '_table_constrained', False) and widget.winfo_ismapped():
+                        assert widget.winfo_width() >= widget.cget('font').measure(widget.cget('text')) + 8, widget.cget('text')
+                    for child in widget.winfo_children():
+                        check_action_buttons(child)
+                check_action_buttons(app.views[tab])
                 ImageGrab.grab().save(out / f'{size}-{tab}-tr.png')
         settings = app.views['settings']
         settings._change_language('English')
