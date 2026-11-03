@@ -7,3 +7,11 @@ dist/
 venv/
 .env
 .env.*
+
+# Sensitive & local configs
+*.pem
+*.key
+rarreg.key
+local.properties
+*.bak
+.DS_Store
